@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
+.env.local
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Test artifacts
+tmp/
+
+# Telemetry (runtime data)
+skill-bus-telemetry.jsonl
+
+# Internal docs (not for public release)
+docs/plans/
+docs/reviews/
+docs/decisions/
+
+# Handover protocol (session-local, not shipped)
+.claude/
+
+# Runtime artifacts
+.claude/skill-bus.json
+.claude/.sb-nudged

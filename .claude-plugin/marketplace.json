@@ -1,0 +1,24 @@
+{
+  "name": "skill-bus-marketplace",
+  "owner": {
+    "name": "Joey Nguyen"
+  },
+  "metadata": {
+    "description": "The skill for connecting skills.",
+    "version": "0.7.0"
+  },
+  "plugins": [
+    {
+      "name": "skill-bus",
+      "source": "./",
+      "description": "Connect context, conditions, and other skills to any skill — no modification required.",
+      "version": "0.7.0",
+      "author": {
+        "name": "Joey Nguyen"
+      },
+      "repository": "https://github.com/joeymnguyen/skill-bus",
+      "keywords": ["skills", "hooks", "subscriptions", "context"],
+      "category": "productivity"
+    }
+  ]
+}
