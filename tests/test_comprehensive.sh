@@ -1596,7 +1596,7 @@ run_test "W1: --timing complete matches when:complete sub" "Run compounding-solu
 W2_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:systematic-debugging" \
     python3 "$DISPATCHER" --timing pre --cwd "$W_DIR" 2>&1)
 run_test_absent "W2a: pre timing doesn't inject complete sub text" "Run compounding-solutions now" "$W2_OUT"
-run_test "W2b: pre timing injects completion instruction" "you MUST run" "$W2_OUT"
+run_test "W2b: pre timing injects completion instruction" "you MUST invoke" "$W2_OUT"
 
 # W3: --timing post does NOT match when:complete sub
 W3_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:systematic-debugging" \
@@ -1658,7 +1658,7 @@ W8_INPUT=$(printf '{"tool_name":"Skill","tool_input":{"skill":"skill-bus:help"},
 W8_OUT=$(echo "$W8_INPUT" | SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent bash "$DISPATCH_SH" pre 2>&1)
 run_test_empty "W8: skill-bus:help not intercepted as complete" "$W8_OUT"
 
-# W9: pre-timing auto-injects "you MUST run /skill-bus:complete" when complete subs exist
+# W9: pre-timing auto-injects completion instruction (Skill tool invocation) when complete subs exist
 W9_DIR=$(mktemp -d)
 CLEANUP_DIRS+=("$W9_DIR")
 mkdir -p "$W9_DIR/.claude"
@@ -1678,8 +1678,8 @@ EOF
 
 W9_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:writing-plans" \
     python3 "$DISPATCHER" --timing pre --cwd "$W9_DIR" 2>&1)
-run_test "W9a: pre-output includes completion instruction" "you MUST run" "$W9_OUT"
-run_test "W9b: completion instruction includes full skill name" "skill-bus:complete superpowers:writing-plans" "$W9_OUT"
+run_test "W9a: pre-output includes completion instruction" "you MUST invoke" "$W9_OUT"
+run_test "W9b: completion instruction includes full skill name" 'skill: \"skill-bus:complete\" and args: \"superpowers:writing-plans\"' "$W9_OUT"
 run_test "W9c: pre-output still includes normal pre-context" "Here is some context" "$W9_OUT"
 
 # W10: no complete subs = no completion instruction injected
@@ -1698,7 +1698,7 @@ EOF
 W10_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:writing-plans" \
     python3 "$DISPATCHER" --timing pre --cwd "$W10_DIR" 2>&1)
 run_test "W10a: no complete subs = normal output" "Pre context only" "$W10_OUT"
-run_test_absent "W10b: no 'you MUST run' when no complete subs" "you MUST run" "$W10_OUT"
+run_test_absent "W10b: no 'you MUST invoke' when no complete subs" "you MUST invoke" "$W10_OUT"
 
 # W11: complete subs with conditions — instruction still injected (conditions evaluated at completion time)
 W11_DIR=$(mktemp -d)
@@ -1716,12 +1716,12 @@ EOF
 
 W11_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:writing-plans" \
     python3 "$DISPATCHER" --timing pre --cwd "$W11_DIR" 2>&1)
-run_test "W11: complete sub with conditions still injects instruction" "you MUST run" "$W11_OUT"
+run_test "W11: complete sub with conditions still injects instruction" "you MUST invoke" "$W11_OUT"
 
 # W12: complete instruction not injected during post timing
 W12_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:writing-plans" \
     python3 "$DISPATCHER" --timing post --cwd "$W9_DIR" 2>&1)
-run_test_absent "W12: post timing does not inject completion instruction" "you MUST run" "$W12_OUT"
+run_test_absent "W12: post timing does not inject completion instruction" "you MUST invoke" "$W12_OUT"
 
 # W13: CRITICAL — skill with ONLY complete subs (no pre subs) still gets completion instruction
 # This tests the early-exit fix: _main() must not exit at "if not matched" when complete subs exist
@@ -1740,8 +1740,8 @@ EOF
 
 W13_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:writing-plans" \
     python3 "$DISPATCHER" --timing pre --cwd "$W13_DIR" 2>&1)
-run_test "W13a: only-complete skill still gets instruction" "you MUST run" "$W13_OUT"
-run_test "W13b: instruction includes skill name" "skill-bus:complete superpowers:writing-plans" "$W13_OUT"
+run_test "W13a: only-complete skill still gets instruction" "you MUST invoke" "$W13_OUT"
+run_test "W13b: instruction includes skill name" 'skill: \"skill-bus:complete\" and args: \"superpowers:writing-plans\"' "$W13_OUT"
 
 # W14: Full chain — pre injects context + completion instruction, then complete fires downstream
 W14_DIR=$(mktemp -d)
@@ -1765,7 +1765,7 @@ EOF
 W14_PRE_INPUT=$(make_dispatch_input "superpowers:writing-plans" "$W14_DIR")
 W14_PRE=$(echo "$W14_PRE_INPUT" | SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent bash "$DISPATCH_SH" pre 2>&1)
 run_test "W14a: pre-hook injects plan-context" "Search for prior decisions" "$W14_PRE"
-run_test "W14b: pre-hook injects completion instruction" "skill-bus:complete superpowers:writing-plans" "$W14_PRE"
+run_test "W14b: pre-hook injects completion instruction" 'skill: \"skill-bus:complete\" and args: \"superpowers:writing-plans\"' "$W14_PRE"
 
 # Phase 2: Complete signal fires downstream
 W14_COMPLETE_INPUT=$(printf '{"tool_name":"Skill","tool_input":{"skill":"skill-bus:complete","args":"superpowers:writing-plans"},"cwd":"%s"}' "$W14_DIR")
@@ -1871,7 +1871,7 @@ EOF
 # Simulate depth=2 arriving from dispatch.sh (via _SB_CHAIN_DEPTH env var)
 W19_OUT=$(_SB_CHAIN_DEPTH=2 SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:debugging" \
     python3 "$DISPATCHER" --timing pre --cwd "$W19_DIR" 2>&1)
-run_test "W19: completion instruction includes depth arg" "skill-bus:complete superpowers:debugging --depth 2" "$W19_OUT"
+run_test "W19: completion instruction includes depth arg" 'args: \"superpowers:debugging --depth 2\"' "$W19_OUT"
 
 # W20: completionHooks=false — complete timing produces no output (feature gate)
 W20_DIR=$(mktemp -d)
@@ -1908,10 +1908,10 @@ W20B_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superp
     python3 "$DISPATCHER" --timing complete --cwd "$W20B_DIR" 2>&1)
 run_test_empty "W20b: completionHooks absent blocks complete timing" "$W20B_OUT"
 
-# W20c: completionHooks=false — pre timing does NOT inject "you MUST run" instruction
+# W20c: completionHooks=false — pre timing does NOT inject completion instruction
 W20C_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:debugging" \
     python3 "$DISPATCHER" --timing pre --cwd "$W20_DIR" 2>&1)
-run_test_absent "W20c: completionHooks=false suppresses instruction injection" "you MUST run" "$W20C_OUT"
+run_test_absent "W20c: completionHooks=false suppresses instruction injection" "you MUST invoke" "$W20C_OUT"
 
 # W21: prompt source with complete subs — completion instruction injected via prompt-bridge
 W21_DIR=$(mktemp -d)
@@ -1933,7 +1933,7 @@ EOF
 
 W21_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:writing-plans" \
     python3 "$DISPATCHER" --timing pre --source prompt --cwd "$W21_DIR" 2>&1)
-run_test "W21a: prompt source injects completion instruction" "you MUST run" "$W21_OUT"
+run_test "W21a: prompt source injects completion instruction" "you MUST invoke" "$W21_OUT"
 run_test "W21b: prompt source hookEventName is UserPromptSubmit" "UserPromptSubmit" "$W21_OUT"
 run_test "W21c: prompt source still includes pre context" "Prompt pre context" "$W21_OUT"
 
@@ -1953,7 +1953,7 @@ EOF
 
 W22_OUT=$(SKILL_BUS_GLOBAL_CONFIG=/dev/null/nonexistent SKILL_BUS_SKILL="superpowers:writing-plans" \
     python3 "$DISPATCHER" --timing pre --source prompt --cwd "$W22_DIR" 2>&1)
-run_test "W22a: prompt-only-complete gets instruction" "you MUST run" "$W22_OUT"
+run_test "W22a: prompt-only-complete gets instruction" "you MUST invoke" "$W22_OUT"
 run_test "W22b: prompt-only-complete uses UserPromptSubmit" "UserPromptSubmit" "$W22_OUT"
 
 # ═══════════════════════════════════════════════════════════════════════════════
