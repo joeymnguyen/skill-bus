@@ -632,7 +632,7 @@ The `session-stats` handler generates a live telemetry summary. If it fails, the
 
 ## Testing
 
-337 tests across four suites:
+342 tests across four suites:
 
 ```bash
 # Run all tests
@@ -644,10 +644,10 @@ bash tests/test_telemetry.sh
 # Condition tests (24 tests — all 6 condition types + edge cases)
 bash tests/test_conditions.sh
 
-# CLI tests (106 tests — groups A-L: format, list, simulate, scope, skills, inserts, review, scan, set, add-insert, complete timing, hardening guards)
+# CLI tests (108 tests — groups A-L: format, list, simulate, scope, skills, inserts, review, scan, set, add-insert, complete timing, hardening guards)
 bash tests/test_cli.sh
 
-# Integration tests (155 tests — groups H-W: dispatch, monitor, conditions, merge, edge cases, nudge, dynamic, onboard, complete timing)
+# Integration tests (158 tests — groups H-W: dispatch, monitor, conditions, merge, edge cases, nudge, dynamic, onboard, complete timing)
 bash tests/test_comprehensive.sh
 ```
 
@@ -701,8 +701,8 @@ skill-bus/
 └── tests/
     ├── test_telemetry.sh       # 52 telemetry tests
     ├── test_conditions.sh      # 24 condition tests
-    ├── test_cli.sh             # 106 CLI tests
-    └── test_comprehensive.sh   # 155 integration tests
+    ├── test_cli.sh             # 108 CLI tests
+    └── test_comprehensive.sh   # 158 integration tests
 ```
 
 ### Tech Stack
